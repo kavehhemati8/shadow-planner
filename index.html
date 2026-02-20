@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Shadow Planner</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #0f172a;
+      color: white;
+      margin: 0;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    .task {
+      display: flex;
+      align-items: center;
+      margin: 10px 0;
+    }
+
+    input[type="checkbox"] {
+      margin-right: 10px;
+      transform: scale(1.3);
+    }
+
+    #score {
+      margin-top: 20px;
+      font-size: 18px;
+      text-align: center;
+    }
+
+    button {
+      margin-top: 15px;
+      padding: 10px;
+      width: 100%;
+      background: #3b82f6;
+      border: none;
+      color: white;
+      font-size: 16px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    canvas {
+      margin-top: 30px;
+      background: white;
+      border-radius: 10px;
+      padding: 10px;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Shadow Planner</h1>
+
+<div id="tasks">
+  <div class="task"><input type="checkbox"> Workout</div>
+  <div class="task"><input type="checkbox"> Study</div>
+  <div class="task"><input type="checkbox"> Trading Practice</div>
+  <div class="task"><input type="checkbox"> Journal Writing</div>
+  <div class="task"><input type="checkbox"> English Practice</div>
+</div>
+
+<div id="score">Score Today: 0</div>
+
+<button onclick="saveDay()">Save Today</button>
+
+<canvas id="chart"></canvas>
+
+<script>
+  const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+  const scoreDisplay = document.getElementById('score');
+
+  checkboxes.forEach(cb => {
+    cb.addEventListener('change', updateScore);
+  });
+
+  function updateScore() {
+    let score = 0;
+    checkboxes.forEach(cb => {
+      if (cb.checked) score++;
+    });
+    scoreDisplay.textContent = "Score Today: " + score;
+  }
+
+  function saveDay() {
+    let score = 0;
+    checkboxes.forEach(cb => {
+      if (cb.checked) score++;
+    });
+
+    let history = JSON.parse(localStorage.getItem('history')) || [];
+    const today = new Date().toLocaleDateString();
+    history.push({ date: today, score: score });
+    localStorage.setItem('history', JSON.stringify(history));
+
+    renderChart();
+    alert("Day Saved!");
+  }
+
+  function renderChart() {
+    const ctx = document.getElementById('chart').getContext('2d');
+    let history = JSON.parse(localStorage.getItem('history')) || [];
+
+    const labels = history.map(h => h.date);
+    const data = history.map(h => h.score);
+
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'Daily Score',
+          data: data,
+          borderColor: '#3b82f6',
+          tension: 0.3
+        }]
+      }
+    });
+  }
+
+  renderChart();
+</script>
+
+</body>
+</html>
